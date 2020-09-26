@@ -51,6 +51,10 @@
 				<img :src="sessionInfo.thumbnail">
 				Title:
 				<b-form-input v-model="sessionInfo.title"></b-form-input>
+				Description:
+				<b-form-input v-model="sessionInfo.description"></b-form-input>
+				Console:
+				<b-form-input v-model="sessionInfo.console"></b-form-input>
 			</div>
 			<div id="video-container">
 				<user-video class="videopreview" :stream-manager="publisher"/>
@@ -86,6 +90,9 @@ export default {
 			sessionInfo: {
 				thumbnail: "default.jpg",
 				title: "Demo Game",
+				description: "Some game I saw once.",
+				console: "Gameboy Advanced",
+				sessionID: "SessionA",
 			},
 			thumbnails: [
 				{value: "default.jpg", text: "Default"},
@@ -99,7 +106,6 @@ export default {
 			videodevices: [{deviceId: "screen", label: "Screen Capture"}],
 			session: undefined,
 			publisher: undefined,
-			sessionID: "SessionA",
 			password: "whatevenisamagfest?",
 			myUserName: 'Participant' + Math.floor(Math.random() * 100),
                         crop: {top: 0, bottom: 0, left: 0, right: 0},
@@ -150,7 +156,7 @@ export default {
 		joinSession () {
 			this.session = this.OV.initSession();
 
-			this.getToken(this.sessionID, this.password).then(resp => {
+			this.getToken(this.sessionInfo.sessionID, this.password).then(resp => {
 				if (resp.role === "PUBLISHER" || resp.role === "MODERATOR") {
 					this.token = resp.token;
 					this.session.connect(resp.token, { clientData: this.myUserName })
@@ -224,15 +230,19 @@ export default {
 						reject(error.response);
 					});
 			});
+		},
+
+		updateSessionInfo() {
+			axios.post(`${OPENVIDU_SERVER_URL}/authenticate/session/${this.sessionInfo.sessionID}`, {session: this.sessionInfo, token: this.token})
+			.catch(() => {
+				console.log("Failed to update sessionInfo");
+			});
 		}
 	},
 	watch: {
 		sessionInfo: {
 			handler() {
-				axios.post(`${OPENVIDU_SERVER_URL}/authenticate/session/${this.sessionID}`, {session: this.sessionInfo, token: this.token})
-				.catch(() => {
-					console.log("Failed to update sessionInfo");
-				});
+				this.updateSessionInfo();
 			},
 			deep: true
 		}	
