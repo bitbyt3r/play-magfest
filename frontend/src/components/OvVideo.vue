@@ -1,6 +1,12 @@
 <template>
-	<video autoplay/>
+	<video class="videoplayer" autoplay/>
 </template>
+
+<style>
+.videoplayer {
+	max-width:  1000px;
+}
+</style>
 
 <script>
 export default {

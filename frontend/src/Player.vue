@@ -2,34 +2,35 @@
 	<div id="main-container" class="container">
 		<div id="join" v-if="!session">
 			<div id="join-dialog" class="jumbotron vertical-center">
-				<h1>Join a video session</h1>
-				<form class="form-group" @submit="joinSession">
-					<p>
-						<label>Participant</label>
-						<input v-model="myUserName" class="form-control" type="text" required>
-					</p>
-					<p>
-						<label>Session</label>
-						<input v-model="mySessionId" class="form-control" type="text" required>
-					</p>
-					<p class="text-center">
-						<input class="btn btn-lg btn-success" type="submit" name="commit" value="Join!">
-					</p>
-				</form>
+				<h1>MAGFest Plays</h1>
+				<p>Now every game is multiplayer! Everyone watching the below game streams has partial control of the console. Use keyboard or gamepad controls to play. The inputs are averaged across everyone playing, so every button press is a vote in realtime.</p>
+				<b-card-group columns>
+					<b-card v-for="info in sessions" :key="info.sessionId" :title="info.title" :img-src="info.thumbnail" img-top>
+						<b-card-text>
+							<p><b>Console:</b> {{ info.console }}</p>
+							<p><b>Description:</b> {{ info.description }}</p>
+							<b-button @click="joinSession(info)">Launch</b-button>
+						</b-card-text>
+					</b-card>
+				</b-card-group>
 			</div>
 		</div>
 
 		<div id="session" v-if="session">
-			<div id="session-header">
-				<h1 id="session-title">{{ mySessionId }}</h1>
-				<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Leave session">
-			</div>
+			<h1 id="session-title">{{ activeSession.title }}</h1>
 			<div id="video-container" class="col-md-6">
 				<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub"/>
+			</div>
+			<div id="session-header">
+				<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Back To Menu">
 			</div>
 		</div>
 	</div>
 </template>
+
+<style scoped>
+
+</style>
 
 <script>
 import axios from 'axios';
@@ -38,7 +39,7 @@ import UserVideo from './components/UserVideo';
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
-const OPENVIDU_SERVER_URL = "https://" + location.hostname;
+const OPENVIDU_SERVER_URL = "//" + location.hostname + ":" + location.port;
 
 export default {
 	name: 'Player',
@@ -50,18 +51,25 @@ export default {
 	data () {
 		return {
 			OV: undefined,
-			session: undefined,
 			subscribers: [],
-
-			mySessionId: 'SessionA',
-			myUserName: 'Participant' + Math.floor(Math.random() * 100),
+			sessions: [],
+			activeSession: {},
+			session: undefined,
+			username: 'Participant' + Math.floor(Math.random() * 10000),
 		}
 	},
-
+	mounted() {
+		axios.get(`${OPENVIDU_SERVER_URL}/authenticate/sessions`)
+		.then(response => response.data)
+		.then(sessions => {
+			this.sessions = sessions;
+		});
+	},
 	methods: {
-		joinSession () {
+		joinSession (sessionInfo) {
 			this.OV = new OpenVidu();
 			this.session = this.OV.initSession();
+			this.activeSession = sessionInfo;
 
 			this.session.on('streamCreated', ({ stream }) => {
 				const subscriber = this.session.subscribe(stream);
@@ -76,8 +84,8 @@ export default {
 				}
 			});
 
-			this.getToken(this.mySessionId).then(token => {
-				this.session.connect(token, { clientData: this.myUserName })
+			this.getToken(sessionInfo.sessionID).then(token => {
+				this.session.connect(token, { clientData: this.username })
 					.catch(error => {
 						console.log('There was an error connecting to the session:', error.code, error.message);
 					});
