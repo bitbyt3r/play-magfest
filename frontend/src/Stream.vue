@@ -5,21 +5,21 @@
 				<h1>Host a game stream</h1>
 				<form class="form-group" @submit="joinSession">
 					<p>
-						<label>Title</label>
-						<input v-model="title" class="form-control" type="text" required>
+						<label>Session ID:</label>
+						<b-form-input v-model="sessionID" class="form-control" type="text" required></b-form-input>
 					</p>
 					<p>
-						<label>Password</label>
-						<input v-model="password" class="form-control" type="password">
+						<label>Password:</label>
+						<b-form-input v-model="password" class="form-control" type="password"></b-form-input>
 					</p>
 					<p>
-						<label>Audio Capture Device</label>
+						<label>Audio Capture Device:</label><br>
 						<select name="audiodevice" v-model="audiodevice">
 							<option v-for="device in audiodevices" :key="device.deviceId" :value="device.deviceId">{{ device.label }}</option>
 						</select>
 					</p>
 					<p>
-						<label>Video Capture Device</label>
+						<label>Video Capture Device:</label><br>
 						<select name="videodevice" v-model="videodevice">
 							<option v-for="device in videodevices" :key="device.deviceId" :value="device.deviceId">{{ device.label }}</option>
 						</select>
@@ -33,20 +33,37 @@
 
 		<div id="session" v-if="session">
 			<div id="session-header">
-				<h1 id="session-title">{{ title }}</h1>
-				<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Disconnect">
-                                <input type="number" v-model="crop.top">
-                                <input type="number" v-model="crop.bottom">
-                                <input type="number" v-model="crop.left">
-                                <input type="number" v-model="crop.right">
-				<input class="btn btn-large btn-danger" type="button" id="buttonCrop" @click="updateCrop" value="Update Crop">
+				<h1 id="session-title">{{ sessionInfo.title }}</h1>
+				<b-button id="buttonLeaveSession" @click="leaveSession" variant="danger">Disconnect</b-button><br>
+				<h3>Cropping</h3>
+				Top:
+				<input type="number" v-model="crop.top">
+				Bottom:
+				<input type="number" v-model="crop.bottom">
+				Left:
+				<input type="number" v-model="crop.left">
+				Right:
+				<input type="number" v-model="crop.right"><br>
+				<b-button id="buttonCrop" @click="updateCrop">Update Crop</b-button>
+				<b-button id="cancelCrop" @click="cancelCrop">Disable Crop</b-button><br>
+				Thumbnail Image:
+				<b-form-select v-model="sessionInfo.thumbnail" :options="thumbnails"></b-form-select>
+				<img :src="sessionInfo.thumbnail">
+				Title:
+				<b-form-input v-model="sessionInfo.title"></b-form-input>
 			</div>
-			<div id="video-container" class="col-md-6">
-				<user-video :stream-manager="publisher"/>
+			<div id="video-container">
+				<user-video class="videopreview" :stream-manager="publisher"/>
 			</div>
 		</div>
 	</div>
 </template>
+
+<style>
+#local-video-undefined {
+	max-width: 1000px;
+}
+</style>
 
 <script>
 import axios from 'axios';
@@ -66,15 +83,24 @@ export default {
 
 	data () {
 		return {
+			sessionInfo: {
+				thumbnail: "default.jpg",
+				title: "Demo Game",
+			},
+			thumbnails: [
+				{value: "default.jpg", text: "Default"},
+				{value: "katamari.jpg", text: "Katamari Damacy"},
+			],
 			OV: undefined,
+			token: "",
 			audiodevice: "default",
 			audiodevices: [],
 			videodevice: "screen",
 			videodevices: [{deviceId: "screen", label: "Screen Capture"}],
 			session: undefined,
 			publisher: undefined,
-			title: 'SessionA',
-			password: "",
+			sessionID: "SessionA",
+			password: "whatevenisamagfest?",
 			myUserName: 'Participant' + Math.floor(Math.random() * 100),
                         crop: {top: 0, bottom: 0, left: 0, right: 0},
                         filter: false,
@@ -115,11 +141,18 @@ export default {
 				this.publisher.stream.applyFilter("GStreamerFilter", { command: "videocrop top="+this.crop.top+" bottom="+this.crop.bottom+" left="+this.crop.left+" right="+this.crop.right });
 			}
 		},
+		cancelCrop() {
+			if (this.filter) {
+				this.publisher.stream.removeFilter();
+				this.filter = false;
+			}
+		},
 		joinSession () {
 			this.session = this.OV.initSession();
 
-			this.getToken(this.title, this.password).then(resp => {
+			this.getToken(this.sessionID, this.password).then(resp => {
 				if (resp.role === "PUBLISHER" || resp.role === "MODERATOR") {
+					this.token = resp.token;
 					this.session.connect(resp.token, { clientData: this.myUserName })
 					.then(() => {
 						navigator.mediaDevices.getUserMedia({
@@ -192,6 +225,17 @@ export default {
 					});
 			});
 		}
+	},
+	watch: {
+		sessionInfo: {
+			handler() {
+				axios.post(`${OPENVIDU_SERVER_URL}/authenticate/session/${this.sessionID}`, {session: this.sessionInfo, token: this.token})
+				.catch(() => {
+					console.log("Failed to update sessionInfo");
+				});
+			},
+			deep: true
+		}	
 	}
 }
 </script>
