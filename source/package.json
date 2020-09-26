@@ -1,62 +1,44 @@
 {
-  "name": "openvidu-electron",
-  "productName": "openvidu-electron",
-  "version": "2.15.0",
-  "description": "OpenVidu Electron Tutorial",
-  "main": "src/main.js",
+  "name": "play-magfest",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
-  },
-  "repository": "https://github.com/OpenVidu/openvidu-tutorials",
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
-  ],
-  "author": "pablofuenteperez@gmail.com",
-  "license": "Apache-2.0",
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "openvidu_electron_forge"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
+    "serve": "vue-cli-service serve --port 5442",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "electron-squirrel-startup": "1.0.0"
+    "core-js": "^3.6.5",
+    "vue": "^2.6.11",
+    "axios": "0.19.2",
+    "openvidu-browser": "2.15.0"
   },
   "devDependencies": {
-    "@electron-forge/cli": "6.0.0-beta.43",
-    "@electron-forge/maker-deb": "6.0.0-beta.43",
-    "@electron-forge/maker-rpm": "6.0.0-beta.43",
-    "@electron-forge/maker-squirrel": "6.0.0-beta.43",
-    "@electron-forge/maker-zip": "6.0.0-beta.43",
-    "electron": "8.1.1"
-  }
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
 }
