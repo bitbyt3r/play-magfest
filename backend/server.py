@@ -32,7 +32,7 @@ def gettoken():
         sessionId = req.json()['id']
     req = requests.post(OPENVIDU_URL+"/api/tokens", json={"session": sessionId, "role": role}, auth=HTTPBasicAuth('OPENVIDUAPP', OPENVIDU_SECRET))
     token = req.json()['token']
-    return jsonify(token=token)
+    return jsonify(token=token, role=role)
 
 if __name__ == "__main__":
     app.run("0.0.0.0", 8081)
