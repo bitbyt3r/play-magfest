@@ -35,6 +35,11 @@
 			<div id="session-header">
 				<h1 id="session-title">{{ title }}</h1>
 				<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Disconnect">
+                                <input type="number" v-model="crop.top">
+                                <input type="number" v-model="crop.bottom">
+                                <input type="number" v-model="crop.left">
+                                <input type="number" v-model="crop.right">
+				<input class="btn btn-large btn-danger" type="button" id="buttonCrop" @click="updateCrop" value="Update Crop">
 			</div>
 			<div id="video-container" class="col-md-6">
 				<user-video :stream-manager="publisher"/>
@@ -71,6 +76,8 @@ export default {
 			title: 'SessionA',
 			password: "",
 			myUserName: 'Participant' + Math.floor(Math.random() * 100),
+                        crop: {top: 0, bottom: 0, left: 0, right: 0},
+                        filter: false,
 		}
 	},
 
@@ -79,6 +86,7 @@ export default {
 		this.OV.getDevices().then(devices => {
 			this.audiodevices =  [];
 			this.videodevices =  [{deviceId: "screen", label: "Screen Capture"}];
+			console.log(devices);
 			devices.forEach(device => {
 				if (device.kind === "audioinput") {
 					this.audiodevices.push(device);
@@ -91,6 +99,16 @@ export default {
 	},
 
 	methods: {
+                updateCrop() {
+                    if (this.filter) {
+                        this.publisher.stream.removeFilter().then(() => {
+                            this.publisher.stream.applyFilter("GStreamerFilter", { command: "videocrop top="+this.crop.top+" bottom="+this.crop.bottom+" left="+this.crop.left+" right="+this.crop.right });
+                        });
+                    } else {
+                        this.filter = true;
+                        this.publisher.stream.applyFilter("GStreamerFilter", { command: "videocrop top="+this.crop.top+" bottom="+this.crop.bottom+" left="+this.crop.left+" right="+this.crop.right });
+                    }
+                },
 		joinSession () {
 			this.session = this.OV.initSession();
 

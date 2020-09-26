@@ -20,13 +20,17 @@ def home():
 def gettoken():
     if not 'session' in request.json:
         return "You must pass a session.", 403
+    role = "SUBSCRIBER"
+    if 'password' in request.json:
+        if request.json['password'] == OPENVIDU_SECRET:
+            role = "MODERATOR"
     req = requests.post(OPENVIDU_URL+"/api/sessions", json={"customSessionId": request.json['session']}, auth=HTTPBasicAuth('OPENVIDUAPP', OPENVIDU_SECRET))
     if req.status_code == 409:
         print("Session {} already exists, reusing.".format(request.json['session']))
         sessionId = request.json['session']
     else:
         sessionId = req.json()['id']
-    req = requests.post(OPENVIDU_URL+"/api/tokens", json={"session": sessionId}, auth=HTTPBasicAuth('OPENVIDUAPP', OPENVIDU_SECRET))
+    req = requests.post(OPENVIDU_URL+"/api/tokens", json={"session": sessionId, "role": role}, auth=HTTPBasicAuth('OPENVIDUAPP', OPENVIDU_SECRET))
     token = req.json()['token']
     return jsonify(token=token)
 
