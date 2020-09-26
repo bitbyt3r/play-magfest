@@ -54,8 +54,11 @@ def postsession(session):
     if not 'token' in request.json:
         return "You must post the token of the session to edit the info.", 403
     req = requests.get(OPENVIDU_URL+"/api/sessions/"+session, auth=auth)
-    token = req.json()['token']
-    if token != request.json['token']:
+    sessionData = req.json()
+    for connection in sessionData['connections']['content']:
+        if connection['token'] == request.json['token'] and connection['role'] in ['PUBLISHER', 'MODERATOR']:
+            break
+    else:
         return "You passed the wrong token for this session.", 403
     if not 'session' in request.json:
         return "You must pass a session object.", 405
