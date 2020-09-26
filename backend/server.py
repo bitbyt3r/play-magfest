@@ -3,6 +3,7 @@ app = Flask(__name__)
 import requests
 from requests.auth import HTTPBasicAuth
 import redis
+import json
 import sys
 import os
 
@@ -44,7 +45,7 @@ def getsessions():
     sessionIDs = [x['sessionId'] for x in req.json()['content']]
     sessions = []
     for ID in sessionIDs:
-        session = r.get(ID)
+        session = json.loads(r.get(ID))
         if session:
             sessions.append(session)
     return jsonify(sessions)
@@ -62,7 +63,7 @@ def postsession(session):
         return "You passed the wrong token for this session.", 403
     if not 'session' in request.json:
         return "You must pass a session object.", 405
-    r.set(session, request.json['session'])
+    r.set(session, json.dumps(request.json['session']))
     return jsonify(request.json['session'])
 
 if __name__ == "__main__":
