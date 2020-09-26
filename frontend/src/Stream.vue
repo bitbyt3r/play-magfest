@@ -83,53 +83,88 @@ export default {
 
 	mounted() {
 		this.OV = new OpenVidu();
-		this.OV.getDevices().then(devices => {
-			this.audiodevices =  [];
-			this.videodevices =  [{deviceId: "screen", label: "Screen Capture"}];
-			console.log(devices);
-			devices.forEach(device => {
-				if (device.kind === "audioinput") {
-					this.audiodevices.push(device);
-				}
-				if (device.kind === "videoinput") {
-					this.videodevices.push(device);
-				}
-			})
+		navigator.mediaDevices.getUserMedia({audio:true, video:true}).then(stream => {
+			var tracks = stream.getTracks();
+			tracks.forEach(track => {
+				track.stop();
+			});
+			navigator.mediaDevices.enumerateDevices().then(devices => {
+				this.audiodevices =  [];
+				this.videodevices =  [{deviceId: "screen", label: "Screen Capture"}];
+				console.log(devices);
+				devices.forEach(device => {
+					if (device.kind === "audioinput") {
+						this.audiodevices.push(device);
+					}
+					if (device.kind === "videoinput") {
+						this.videodevices.push(device);
+					}
+				})
+			});
 		});
 	},
 
 	methods: {
-                updateCrop() {
-                    if (this.filter) {
-                        this.publisher.stream.removeFilter().then(() => {
-                            this.publisher.stream.applyFilter("GStreamerFilter", { command: "videocrop top="+this.crop.top+" bottom="+this.crop.bottom+" left="+this.crop.left+" right="+this.crop.right });
-                        });
-                    } else {
-                        this.filter = true;
-                        this.publisher.stream.applyFilter("GStreamerFilter", { command: "videocrop top="+this.crop.top+" bottom="+this.crop.bottom+" left="+this.crop.left+" right="+this.crop.right });
-                    }
-                },
+		updateCrop() {
+			if (this.filter) {
+				this.publisher.stream.removeFilter().then(() => {
+					this.publisher.stream.applyFilter("GStreamerFilter", { command: "videocrop top="+this.crop.top+" bottom="+this.crop.bottom+" left="+this.crop.left+" right="+this.crop.right });
+				});
+			} else {
+				this.filter = true;
+				this.publisher.stream.applyFilter("GStreamerFilter", { command: "videocrop top="+this.crop.top+" bottom="+this.crop.bottom+" left="+this.crop.left+" right="+this.crop.right });
+			}
+		},
 		joinSession () {
 			this.session = this.OV.initSession();
 
-			this.getToken(this.title, this.password).then(token => {
-				this.session.connect(token, { clientData: this.myUserName })
+			this.getToken(this.title, this.password).then(resp => {
+				if (resp.role === "PUBLISHER" || resp.role === "MODERATOR") {
+					this.session.connect(resp.token, { clientData: this.myUserName })
 					.then(() => {
-						this.publisher = this.OV.initPublisher(undefined, {
-							audioSource: this.audiodevice, // The source of audio. If undefined default microphone
-							videoSource: this.videodevice, // The source of video. If undefined default webcam
-							publishAudio: true,  	// Whether you want to start publishing with your audio unmuted or not
-							publishVideo: true,  	// Whether you want to start publishing with your video enabled or not
-							resolution: '640x480',  // The resolution of your video
-							frameRate: 30,			// The frame rate of your video
-							insertMode: 'APPEND',	// How the video is inserted in the target element 'video-container'
-							mirror: false       	// Whether to mirror your local video or not
+						navigator.mediaDevices.getUserMedia({
+							audio: {
+								deviceId: this.audiodevice.deviceId,
+								autoGainControl: false,
+								echoCancellation: false,
+								noiseSuppression: false,
+							},
+							video: {
+								deviceId: this.videodevice.deviceId,
+							}
+						}).then(stream => {
+							var audioTracks = stream.getAudioTracks();
+							var videoTracks = stream.getVideoTracks();
+							var audio = audio;
+							var video = video;
+							if (audioTracks.length > 0) {
+								console.log("Attempting to open audio track", audioTracks[0]);
+								audio = audioTracks[0];
+							}
+							if (videoTracks.length > 0) {
+								console.log("Attempting to open video track", videoTracks[0]);
+								video = videoTracks[0];
+							}
+							this.publisher = this.OV.initPublisher(undefined, {
+								audioSource: this.audiodevice, // The source of audio. If undefined default microphone
+								videoSource: this.videodevice, // The source of video. If undefined default webcam
+								publishAudio: true,  	// Whether you want to start publishing with your audio unmuted or not
+								publishVideo: true,  	// Whether you want to start publishing with your video enabled or not
+								resolution: '640x480',  // The resolution of your video
+								frameRate: 30,			// The frame rate of your video
+								insertMode: 'APPEND',	// How the video is inserted in the target element 'video-container'
+								mirror: false       	// Whether to mirror your local video or not
+							});
+							this.session.publish(this.publisher);
 						});
-						this.session.publish(this.publisher);
 					})
 					.catch(error => {
 						console.log('There was an error connecting to the session:', error.code, error.message);
 					});
+				} else {
+					this.session = null;
+					console.log("Could not get a publisher or moderator role. Probably incorrect password?");
+				}
 			});
 
 			window.addEventListener('beforeunload', this.leaveSession)
@@ -150,7 +185,7 @@ export default {
 				axios
 					.post(`${OPENVIDU_SERVER_URL}/authenticate/gettoken`, {session: sessionId, password: password})
 					.then(response => response.data)
-					.then(data => resolve(data.token))
+					.then(data => resolve(data))
 					.catch(error => {
 						console.log("Failed to get token.");
 						reject(error.response);
