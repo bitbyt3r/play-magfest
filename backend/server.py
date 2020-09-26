@@ -40,7 +40,7 @@ def gettoken():
 
 @app.route("/authenticate/sessions", methods=["GET"])
 def getsessions():
-    req = requests.get(OPENVIDU_URL+"/api/sessions", auth)
+    req = requests.get(OPENVIDU_URL+"/api/sessions", auth=auth)
     sessionIDs = [x['sessionId'] for x in req.json()['content']]
     sessions = []
     for ID in sessionIDs:
