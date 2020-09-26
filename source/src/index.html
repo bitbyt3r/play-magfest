@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>MAGFest Plays - Game Capture</title>
+  <link rel="styleSheet" href="style.css" type="text/css" media="screen">
+  <script src="openvidu-browser-2.15.0.js"></script>
+  <script src="axios.min.js"></script>
+  <script src="app.js"></script>
+</head>
+
+<body>
+
+  <h1>MAGFest Plays</h1>
+
+  <div id="join">
+    <p>Enter the stream details to start a game stream:</p>
+    <form onsubmit="initPublisher(); return false">
+      <p>
+        <label>Session:</label>
+        <input type="text" id="sessionId" value="DemoGame" required><br>
+        <label>Stream Key:</label>
+        <input type="password" id="password" required>
+      </p>
+      <p>
+        <input id="use-camera" type="checkbox" name="usecamera">Capture camera instead of screen<br>
+        <select name="audioselect" id="audioinput">
+        </select>
+        <select name="videoselect" id="videoinput">
+        </select>
+      </p>
+      <p>
+        <input type="submit" value="Connect">
+      </p>
+    </form>
+  </div>
+
+  <div id="session" style="display: none;">
+    <h1 id="session-header"></h1>
+    <input type="button" onclick="leaveSession()" value="Disconnect">
+    <div>
+      <div id="publisher">
+        <h3>Preview</h3>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
