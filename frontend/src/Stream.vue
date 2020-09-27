@@ -6,7 +6,7 @@
 				<form class="form-group" @submit="joinSession">
 					<p>
 						<label>Session ID:</label>
-						<b-form-input v-model="sessionID" class="form-control" type="text" required></b-form-input>
+						<b-form-input v-model="sessionInfo.sessionID" class="form-control" type="text" required></b-form-input>
 					</p>
 					<p>
 						<label>Password:</label>
@@ -48,7 +48,7 @@
 				<b-button id="cancelCrop" @click="cancelCrop">Disable Crop</b-button><br>
 				Thumbnail Image:
 				<b-form-select v-model="sessionInfo.thumbnail" :options="thumbnails"></b-form-select>
-				<img :src="sessionInfo.thumbnail">
+				<img class="thumbnail" :src="sessionInfo.thumbnail"><br>
 				Title:
 				<b-form-input v-model="sessionInfo.title"></b-form-input>
 				Description:
@@ -64,8 +64,8 @@
 </template>
 
 <style>
-#local-video-undefined {
-	max-width: 1000px;
+.thumbnail {
+	max-width: 100px;
 }
 </style>
 
@@ -195,6 +195,7 @@ export default {
 								mirror: false       	// Whether to mirror your local video or not
 							});
 							this.session.publish(this.publisher);
+							this.updateSessionInfo();
 						});
 					})
 					.catch(error => {
