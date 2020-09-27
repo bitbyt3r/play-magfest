@@ -12,17 +12,17 @@
             </div>
             <div v-else-if="controller == 'n64'">
                 C Buttons - Arrow keys<br>
-                DPad - WASD
-                Analog Stick - HBNM
-                Left Shoulder - Q
-                Right Shoulder - E
-                A - J
-                B - K
-                Z - G
+                DPad - WASD<br>
+                Analog Stick - HBNM<br>
+                Left Shoulder - Q<br>
+                Right Shoulder - E<br>
+                A - J<br>
+                B - K<br>
+                Z - G<br>
                 Start - F
             </div>
             <div v-else-if="controller == 'playstation'">
-
+                Controls pending development...
             </div>
         </div>
         <div v-else>Keyboard controls disabled. Click here to activate.</div>

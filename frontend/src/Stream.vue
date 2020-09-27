@@ -60,6 +60,7 @@
 					<option value="gameboy">Gameboy</option>
 					<option value="n64">Nintendo 64</option>
 					<option value="playstation">Playstation</option>
+					<option value="gamecube">GameCube</option>
 				</select>
 			</div>
 			<div id="video-container">
@@ -113,7 +114,7 @@ export default {
 			videodevices: [{deviceId: "screen", label: "Screen Capture"}],
 			session: undefined,
 			publisher: undefined,
-			password: "whatevenisamagfest?",
+			password: "",
 			myUserName: 'Participant' + Math.floor(Math.random() * 100),
                         crop: {top: 0, bottom: 0, left: 0, right: 0},
                         filter: false,
