@@ -4,7 +4,8 @@
 
 <style>
 .videoplayer {
-	max-width:  1000px;
+	width:  640px;
+	height: 480px;
 }
 </style>
 

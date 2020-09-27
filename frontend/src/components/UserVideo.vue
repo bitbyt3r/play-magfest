@@ -1,5 +1,5 @@
 <template>
-<div v-if="streamManager">
+<div class="text-center" v-if="streamManager">
 	<ov-video :stream-manager="streamManager"/>
 </div>
 </template>
