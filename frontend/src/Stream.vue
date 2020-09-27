@@ -55,6 +55,12 @@
 				<b-form-input v-model="sessionInfo.description"></b-form-input>
 				Console:
 				<b-form-input v-model="sessionInfo.console"></b-form-input>
+				Controller:
+				<select name="controller" v-model="sessionInfo.controller">
+					<option value="gameboy">Gameboy</option>
+					<option value="n64">Nintendo 64</option>
+					<option value="playstation">Playstation</option>
+				</select>
 			</div>
 			<div id="video-container">
 				<user-video class="videopreview" :stream-manager="publisher"/>
@@ -93,6 +99,7 @@ export default {
 				description: "Some game I saw once.",
 				console: "Gameboy Advanced",
 				sessionID: "SessionA",
+				controller: "gameboy",
 			},
 			thumbnails: [
 				{value: "default.jpg", text: "Default"},

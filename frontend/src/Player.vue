@@ -17,25 +17,34 @@
 		</div>
 
 		<div id="session" v-if="session">
-			<h1 id="session-title">{{ activeSession.title }}</h1>
-			<div id="video-container" class="col-md-6">
-				<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub"/>
-			</div>
-			<div id="session-header">
-				<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Back To Menu">
-			</div>
+			<b-card-group deck>
+				<b-card :title="activeSession.title">
+					<b-card-text>
+						<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub"/>
+					</b-card-text>
+				</b-card>
+				<b-card class="controls" title="Controls">
+					<b-card-text>
+						<game-pad :controller="activeSession.controller"></game-pad>
+						<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Back To Menu">
+					</b-card-text>
+				</b-card>
+			</b-card-group>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-
+.controls {
+	max-width: 350px;
+}
 </style>
 
 <script>
 import axios from 'axios';
 import { OpenVidu } from 'openvidu-browser';
 import UserVideo from './components/UserVideo';
+import GamePad from './components/Gamepad';
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
@@ -46,6 +55,7 @@ export default {
 
 	components: {
 		UserVideo,
+		GamePad,
 	},
 
 	data () {
