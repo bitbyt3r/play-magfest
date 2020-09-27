@@ -24,6 +24,9 @@
             <div v-else-if="controller == 'playstation'">
                 Controls pending development...
             </div>
+            <div v-else-if="controller == 'gamecube'">
+                Controls pending development...
+            </div>
         </div>
         <div v-else>Keyboard controls disabled. Click here to activate.</div>
     </div>
@@ -80,6 +83,11 @@ export default {
                     axes: {},
                     image: "playstation.jpg",
                 },
+                gamecube: {
+                    buttons: {},
+                    axes: {},
+                    image: "gamecube.jpg",
+                }
             }
         }
     },
