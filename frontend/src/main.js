@@ -7,6 +7,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import Player from './Player.vue'
 import Stream from './Stream.vue'
 import App from './App.vue'
+import GamePad from './components/Gamepad.vue'
 
 Vue.config.productionTip = false
 Vue.use(VueRouter);
@@ -15,7 +16,8 @@ Vue.use(IconsPlugin);
 
 const routes = [
   {path: "/", component: Player},
-  {path: "/stream", component: Stream}
+  {path: "/stream", component: Stream},
+  {path: "/gamepad", component: GamePad},
 ]
 
 const router = new VueRouter({
