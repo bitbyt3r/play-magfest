@@ -45,7 +45,14 @@ def getsessions():
     sessionIDs = [x['sessionId'] for x in req.json()['content']]
     sessions = []
     for ID in sessionIDs:
-        session = json.loads(r.get(ID))
+        raw_session = r.get(ID)
+        if raw_session:
+            try:
+                session = json.loads(raw_session)
+            except:
+                continue
+        else:
+            continue
         if session:
             sessions.append(session)
     return jsonify(sessions)
