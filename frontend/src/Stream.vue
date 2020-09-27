@@ -115,7 +115,7 @@ export default {
 
 	mounted() {
 		this.OV = new OpenVidu();
-		navigator.mediaDevices.getDisplayMedia({audio:true, video:true}).then(stream => {
+		navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
 			var tracks = stream.getTracks();
 			tracks.forEach(track => {
 				track.stop();
