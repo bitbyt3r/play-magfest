@@ -25,7 +25,7 @@
 				</b-card>
 				<b-card class="controls" title="Controls">
 					<b-card-text>
-						<game-pad :controller="activeSession.controller"></game-pad>
+						<game-pad :controller="activeSession.controller" :key="activeSession.controller"></game-pad>
 						<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Back To Menu">
 					</b-card-text>
 				</b-card>

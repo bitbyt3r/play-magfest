@@ -1,61 +1,78 @@
 <template>
 	<div>
-        <img :src="controls[controller].image" width="300px" @mousedown="mousedown" draggable="false">
-        <h3>Keyboard Controls:</h3>
-        <div v-if="keyboardActive">
-            <div v-if="controller == 'gameboy'">
-                DPad - Arrow keys<br>
-                A - Z<br>
-                B - X<br>
-                Start - A<br>
-                Select - S
-            </div>
-            <div v-else-if="controller == 'n64'">
-                C Buttons - Arrow keys<br>
-                DPad - WASD<br>
-                Analog Stick - HBNM<br>
-                Left Shoulder - Q<br>
-                Right Shoulder - E<br>
-                A - J<br>
-                B - K<br>
-                Z - G<br>
-                Start - F
-            </div>
-            <div v-else-if="controller == 'playstation'">
-                Left Stick - WASD, Left Shift to click<br>
-                Right Stick - Arrow Keys, Right Shift to click<br>
-                DPad - 6TYU (Why does this thing have so many buttons...<br>
-                Triangle - I<br>
-                Square - J<br>
-                X - K<br>
-                O - L<br>
-                Select - G<br>
-                Start - H<br>
-                Left Shoulder - Q<br>
-                Right Shoulder - E<br>
-                Left Trigger - 1<br>
-                Right Trigger - 3
-            </div>
-            <div v-else-if="controller == 'gamecube'">
-                Left Stick - WASD<br>
-                C-Stick - Arrow Keys<br>
-                DPad - TFGH<br>
-                B - J<br>
-                A - K<br>
-                X - O<br>
-                Y - I<br>
-                Z - U<br>
-                Left Shoulder - Q<br>
-                Right Shoulder - E<br>
-                Start - B
-            </div>
+        <img ref="graphic" :src="controls[controller].image" width="300px" @mousedown="mousedown" draggable="false">
+        <div>
+            <span v-for="(dot, name) in userdots" v-bind:key="name" class="userdot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
+            <span v-for="(dot, name) in globaldots" v-bind:key="name" class="globaldot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
         </div>
-        <div v-else>Keyboard controls disabled. Click here to activate.</div>
+        <div v-if="gamepadActive">
+            Gamepad connected, keyboard disabled.
+            <b-button @click="gamepaddisconnected">Disable Gamepad</b-button>
+        </div>
+        <div v-else>
+            <h3>Keyboard Controls:</h3>
+            <div v-if="keyboardActive">
+                <div v-if="controller == 'gameboy'">
+                    DPad - Arrow keys<br>
+                    A - Z<br>
+                    B - X<br>
+                    Start - A<br>
+                    Select - S
+                </div>
+                <div v-else-if="controller == 'n64'">
+                    C Buttons - Arrow keys<br>
+                    DPad - WASD<br>
+                    Analog Stick - HBNM<br>
+                    Left Shoulder - Q<br>
+                    Right Shoulder - E<br>
+                    A - J<br>
+                    B - K<br>
+                    Z - G<br>
+                    Start - F
+                </div>
+                <div v-else-if="controller == 'playstation'">
+                    Left Stick - WASD, Left Shift to click<br>
+                    Right Stick - Arrow Keys, Right Shift to click<br>
+                    DPad - 6TYU (Why does this thing have so many buttons...<br>
+                    Triangle - I<br>
+                    Square - J<br>
+                    X - K<br>
+                    O - L<br>
+                    Select - G<br>
+                    Start - H<br>
+                    Left Shoulder - Q<br>
+                    Right Shoulder - E<br>
+                    Left Trigger - 1<br>
+                    Right Trigger - 3
+                </div>
+                <div v-else-if="controller == 'gamecube'">
+                    Left Stick - WASD<br>
+                    C-Stick - Arrow Keys<br>
+                    DPad - TFGH<br>
+                    B - J<br>
+                    A - K<br>
+                    X - O<br>
+                    Y - I<br>
+                    Z - U<br>
+                    Left Shoulder - Q<br>
+                    Right Shoulder - E<br>
+                    Start - B
+                </div>
+            </div>
+            <div v-else>Keyboard controls disabled. Click here to activate.</div>
+        </div>
     </div>
 </template>
 
 <style>
-
+.userdot {
+    height: 25px;
+    width: 25px;
+    background-color: #f00;
+    border-radius: 50%;
+    display: block;
+    position: fixed;
+}
 </style>
 
 <script>
@@ -72,24 +89,28 @@ export default {
 
     data() {
         return {
-            gamepad: [],
+            gamepad: undefined,
             gamepadActive: false,
             keyboardActive: true,
+            statusUpdater: undefined,
             image: "gameboy.jpg",
+            userdots: {},
+            globaldots: {},
             state: {},
             clickedButton: "",
+            clickedAxis: "",
             clickStart: [0,0],
             controls: {
                 gameboy: {
                     buttons: {
-                        up:     {x: 0.2067, y: 0.6321, type: "button", gamepadIdx: 0, keycode: "ArrowUp"},
-                        down:   {x: 0.2066, y: 0.7215, type: "button", gamepadIdx: 1, keycode: "ArrowDown"},
-                        left:   {x: 0.13,   y: 0.6768, type: "button", gamepadIdx: 2, keycode: "ArrowLeft"},
-                        right:  {x: 0.2833, y: 0.6788, type: "button", gamepadIdx: 3, keycode: "ArrowRight"},
-                        a:      {x: 0.8566, y: 0.6443, type: "button", gamepadIdx: 4, keycode: "KeyZ"},
-                        b:      {x: 0.6933, y: 0.6890, type: "button", gamepadIdx: 5, keycode: "KeyX"},
-                        start:  {x: 0.53,   y: 0.8191, type: "button", gamepadIdx: 6, keycode: "KeyA"},
-                        select: {x: 0.36,   y: 0.8211, type: "button", gamepadIdx: 7, keycode: "KeyS"},
+                        up:     {x: 0.2067, y: 0.6321, type: "button", gamepadIdx: 12, keycode: "ArrowUp"},
+                        down:   {x: 0.2066, y: 0.7215, type: "button", gamepadIdx: 13, keycode: "ArrowDown"},
+                        left:   {x: 0.13,   y: 0.6768, type: "button", gamepadIdx: 14, keycode: "ArrowLeft"},
+                        right:  {x: 0.2833, y: 0.6788, type: "button", gamepadIdx: 15, keycode: "ArrowRight"},
+                        a:      {x: 0.8566, y: 0.6443, type: "button", gamepadIdx: 1, keycode: "KeyZ"},
+                        b:      {x: 0.6933, y: 0.6890, type: "button", gamepadIdx: 0, keycode: "KeyX"},
+                        start:  {x: 0.53,   y: 0.8191, type: "button", gamepadIdx: 9, keycode: "KeyA"},
+                        select: {x: 0.36,   y: 0.8211, type: "button", gamepadIdx: 8, keycode: "KeyS"},
                     },
                     image: "gameboy.jpg",
                 },
@@ -109,15 +130,15 @@ export default {
                         lshoulder: {x: 0.1633, y: 0.1424, type: "button", gamepadIdx: 4, keycode: "KeyQ"},
                         rshoulder: {x: 0.8300, y: 0.1458, type: "button", gamepadIdx: 5, keycode: "KeyE"},
                         z:         {x: 0.5033, y: 0.6915, type: "button", gamepadIdx: 9, keycode: "KeyG"},
-                        analog:    {x: 0.5100, y: 0.5424, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyH", "KeyB", "KeyN", "KeyM"], clickable: false},
+                        analog:    {x: 0.5100, y: 0.5424, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyH", "KeyB", "KeyN", "KeyM"]},
                     },
                     image: "n64.jpg",
                 },
                 playstation: {
                     buttons: {
                         up:        {x: 0.2300, y: 0.3500, type: "button", gamepadIdx: 12, keycode: "Digit6"},
-                        down:      {x: 0.2333, y: 0.5000, type: "button", gamepadIdx: 13, keycode: "KeyT"},
-                        left:      {x: 0.1800, y: 0.4300, type: "button", gamepadIdx: 14, keycode: "KeyY"},
+                        down:      {x: 0.2333, y: 0.5000, type: "button", gamepadIdx: 13, keycode: "KeyY"},
+                        left:      {x: 0.1800, y: 0.4300, type: "button", gamepadIdx: 14, keycode: "KeyT"},
                         right:     {x: 0.2867, y: 0.4200, type: "button", gamepadIdx: 15, keycode: "KeyU"},
                         t:         {x: 0.7600, y: 0.3150, type: "button", gamepadIdx: 3, keycode: "KeyI"},
                         s:         {x: 0.6867, y: 0.4250, type: "button", gamepadIdx: 2, keycode: "KeyJ"},
@@ -129,8 +150,10 @@ export default {
                         r:         {x: 0.7600, y: 0.1250, type: "button", gamepadIdx: 5, keycode: "KeyE"},
                         lt:        {x: 0.2333, y: 0.2250, type: "button", gamepadIdx: 6, keycode: "Digit1"},
                         rt:        {x: 0.7633, y: 0.2250, type: "button", gamepadIdx: 7, keycode: "Digit3"},
-                        lstick:    {x: 0.3600, y: 0.6250, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyW", "KeyA", "KeyS", "KeyD", "ShiftLeft"], clickable: true},
-                        rstick:    {x: 0.6367, y: 0.6200, type: "axis", gamepadIdx: [2, 3], flip: [1, 1], keycode: ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight", "ShiftRight"], clickable: true},
+                        lstick:    {x: 0.3600, y: 0.6250, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyW", "KeyA", "KeyS", "KeyD"]},
+                        lstick_btn:{x: 0.3600, y: 0.6250, type: "button", gamepadIdx: 10, keycode: "ShiftLeft"},
+                        rstick:    {x: 0.6367, y: 0.6200, type: "axis", gamepadIdx: [2, 3], flip: [1, 1], keycode: ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"]},
+                        rstick_btn:{x: 0.6367, y: 0.6200, type: "button", gamepadIdx: 11, keycode: "ShiftRight"},
                     },
                     image: "playstation.jpg",
                 },
@@ -148,73 +171,189 @@ export default {
                         rshoulder: {x: 0.7367, y: 0.1767, type: "button", gamepadIdx: 5, keycode: "KeyE"},
                         start:     {x: 0.5633, y: 0.2759, type: "button", gamepadIdx: 8, keycode: "KeyB"},
                         z:         {x: 0.7833, y: 0.2112, type: "button", gamepadIdx: 9, keycode: "KeyU"},
-                        lstick:    {x: 0.2533, y: 0.3621, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyW", "KeyA", "KeyS", "KeyD"], clickable: false},
-                        cstick:    {x: 0.6167, y: 0.5733, type: "axis", gamepadIdx: [2, 3], flip: [1, 1], keycode: ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"], clickable: false},
+                        lstick:    {x: 0.2533, y: 0.3621, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyW", "KeyA", "KeyS", "KeyD"]},
+                        cstick:    {x: 0.6167, y: 0.5733, type: "axis", gamepadIdx: [2, 3], flip: [1, 1], keycode: ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"]},
                     },
                     image: "gamecube.jpg",
                 }
             }
         }
     },
-    
     mounted () {
-        window.addEventListener('keydown', this.keydown);
-        window.addEventListener('keyup', this.keyup);
-        window.addEventListener('mouseup', this.mouseup);
-        window.addEventListener('gamepadconnected', this.gamepadconnected);
-        window.addEventListener('gamepaddisconnected', this.gamepaddisconnected);
-        window.addEventListener('focus', () => {
-            this.keyboardActive = true;
-        });
-        window.addEventListener('blur', () => {
-            this.keyboardActive = false;
-        });
+        console.log("mounted");
+        this.setListeners();
     },
-
     beforeDestroy() {
-        window.removeEventListener('keydown', this.keydown);
-        window.removeEventListener('keyup', this.keyup);
-        window.removeEventListener('mouseup', this.mouseup);
-        window.removeEventListener('gamepadconnected', this.gamepaddisconnected);
-        window.removeEventListener('gamepaddisconnected', this.gamepaddisconnected);
-        window.removeEventListener('focus');
-        window.removeEventListener('blur');
-        if (this.clickedButton != "") {
-            window.removeEventListener('mousemove', this.mousemove);
-        }
+        console.log("beforeDestroy");
+        this.clearListeners();
+    },
+    activated () {
+        console.log("activated");
+        this.setListeners();
+    },
+    deactivated() {
+        console.log("deactivated");
+        this.clearListeners();
     },
     
     methods: {
+        setListeners() {
+            this.gamepadconnected(null);
+            window.addEventListener('keydown', this.keydown);
+            window.addEventListener('keyup', this.keyup);
+            window.addEventListener('mouseup', this.mouseup);
+            window.addEventListener('mousemove', this.mousemove);
+            window.addEventListener('gamepadconnected', this.gamepadconnected);
+            window.addEventListener('gamepaddisconnected', this.gamepaddisconnected);
+            window.addEventListener('focus', this.focus);
+            window.addEventListener('blur', this.blur);
+            this.statusUpdater = setInterval(this.updateState, 30);
+        },
+        clearListeners() {
+            window.removeEventListener('keydown', this.keydown);
+            window.removeEventListener('keyup', this.keyup);
+            window.removeEventListener('mouseup', this.mouseup);
+            window.removeEventListener('mousemove', this.mousemove);
+            window.removeEventListener('gamepadconnected', this.gamepaddisconnected);
+            window.removeEventListener('gamepaddisconnected', this.gamepaddisconnected);
+            window.removeEventListener('focus', this.focus);
+            window.removeEventListener('blur', this.blur);
+            if (this.clickedButton != "") {
+                window.removeEventListener('mousemove', this.mousemove);
+            }
+            clearInterval(this.statusUpdater);
+        },
+        focus() {
+            this.keyboardActive = true;
+        },
+        blur() {
+            this.keyboardActive = false;
+        },
+        updateState() {
+            const buttons = this.controls[this.controller].buttons;
+            const box = this.$refs.graphic.getBoundingClientRect();
+            const width = box.right - box.left;
+            const height = box.bottom - box.top;
+            for (const [name, status] of Object.entries(this.state)) {
+                if (!Object.prototype.hasOwnProperty.call(this.userdots, name)) {
+                    this.$set(this.userdots, name, {x: 0, y: 0, visibility: 'hidden'});
+                }
+                if (buttons[name].type === "button") {
+                    const x = box.left + width * buttons[name].x - 25/2;
+                    const y = box.top + height * buttons[name].y - 25/2;
+                    this.$set(this.userdots[name], 'x', x);
+                    this.$set(this.userdots[name], 'y', y);
+                    if (status >= 0.99) {
+                        this.$set(this.userdots[name], 'visibility', 'visible');
+                    } else {
+                        this.$set(this.userdots[name], 'visibility', 'hidden');
+                    }
+                } else if (buttons[name].type === "axis") {
+                    const x = box.left + width * buttons[name].x - 25/2;
+                    const y = box.top + height * buttons[name].y - 25/2;
+                    this.$set(this.userdots[name], 'x', status[0]*25+x);
+                    this.$set(this.userdots[name], 'y', status[1]*25+y);
+                    if (Math.abs(status[0]) > 0.05 || Math.abs(status[1]) > 0.05) {
+                        this.$set(this.userdots[name], 'visibility', 'visible');
+                    } else {
+                        this.$set(this.userdots[name], 'visibility', 'hidden');
+                    }
+                }
+            }
+        },
         keydown(event) {
-            console.log(event);
+            if (this.gamepadActive) {
+                return;
+            }
+            event.preventDefault();
+            if (event.repeat) {
+                return;
+            }
+            for (const [name, button] of Object.entries(this.controls[this.controller].buttons)) {
+                if (button.type === "button") {
+                    if (button.keycode === event.code) {
+                        this.$set(this.state, name, 1);
+                    }
+                } else if (button.type === "axis") {
+                    if (!Object.prototype.hasOwnProperty.call(this.state, name)) {
+                        this.$set(this.state, name, [0,0]);
+                    }
+                    var x = this.state[name][0];
+                    var y = this.state[name][1];
+                    for (var i=0; i<button.keycode.length; i++) {
+                        if (button.keycode[i] === event.code) {
+                            if (i === 0) {
+                                y = -1;
+                            } else if (i === 1) {
+                                x = -1;
+                            } else if (i === 2) {
+                                y = 1;
+                            } else if (i === 3) {
+                                x = 1;
+                            }
+                            this.$set(this.state, name, [x, y]);
+                        }
+                    }
+                }
+            }
         },
         keyup(event) {
-            console.log(event);
+            if (this.gamepadActive) {
+                return;
+            }
+            for (const [name, button] of Object.entries(this.controls[this.controller].buttons)) {
+                if (button.type === "button") {
+                    if (button.keycode === event.code) {
+                        this.$set(this.state, name, 0);
+                    }
+                } else if (button.type === "axis") {
+                    var x = this.state[name][0];
+                    var y = this.state[name][1];
+                    for (var i=0; i<button.keycode.length; i++) {
+                        if (button.keycode[i] === event.code) {
+                            if (i % 2 === 0) {
+                                y = 0;
+                            } else {
+                                x = 0;
+                            }
+                            this.$set(this.state, name, [x, y]);
+                        }
+                    }
+                }
+            }
         },
-        nearestButton(event) {
+        nearestButton(event, type, radius) {
             var x = event.offsetX / event.srcElement.clientWidth;
             var y = event.offsetY / event.srcElement.clientHeight; // Both use width so that distances are square
             var closest = "";
             var smallestDistance = 1;
-            for (const [name, position] of Object.entries(this.controls[this.controller].buttons)) {
-                const distance = Math.sqrt(Math.pow(x-position[0], 2)+Math.pow(y-position[1], 2));
-                if (distance < smallestDistance) {
-                    closest = name;
-                    smallestDistance = distance;
+            for (const [name, button] of Object.entries(this.controls[this.controller].buttons)) {
+                if (button.type === type) {
+                    const distance = Math.sqrt(Math.pow(x-button.x, 2)+Math.pow(y-button.y, 2));
+                    if (distance < smallestDistance) {
+                        closest = name;
+                        smallestDistance = distance;
+                    }
                 }
             }
-            if (smallestDistance > 0.075) {
+            if (smallestDistance > radius) {
                 return "";
             }
             return closest;
         },
         mousedown(event) {
-            const pressed = this.nearestButton(event);
+            if (this.gamepadActive) {
+                return;
+            }
+            const pressed = this.nearestButton(event, "button", 0.075);
             if (pressed != "") {
-                window.addEventListener('mousemove', this.mousemove);
-                this.state[pressed] = "down";
+                this.state[pressed] = 1;
             }
             this.clickedButton = pressed;
+            const pressedaxis = this.nearestButton(event, "axis", 0.2);
+            if (pressedaxis != "") {
+                this.clickedAxis = pressedaxis;
+            }
             this.clickStart = [
                 event.pageX,
                 event.pageY,
@@ -222,32 +361,81 @@ export default {
                 event.srcElement.clientHeight,
             ];
         },
-        mouseup(event) {
+        mouseup() {
+            if (this.gamepadActive) {
+                return;
+            }
             if (this.clickedButton != "") {
-                window.removeEventListener('mousemove', this.mousemove);
+                const button = this.controls[this.controller].buttons[this.clickedButton];
+                if (button.type === "button") {
+                    this.state[this.clickedButton] = 0;
+                    this.clickedButton = "";
+                } else if (button.type === "axis") {
+                    this.state[this.clickedButton] = [0, 0];
+                    this.clickedButton = "";
+                }
+            }
+            this.clickedAxis = "";
+        },
+        mousemove(event) {
+            if (this.gamepadActive) {
+                return;
+            }
+            if (this.clickedButton != "") {
                 var dx = (event.pageX - this.clickStart[0]) / this.clickStart[2];
                 var dy = (event.pageY - this.clickStart[1]) / this.clickStart[2]; // Both use width so that distances are square
                 var distance = Math.sqrt(Math.pow(dx, 2)+Math.pow(dy, 2));
-                if (distance < 0.1) {
-                    console.log();
+                if (distance > 0.1 && this.clickedAxis != "") {
+                    this.state[this.clickedButton] = 0;
+                    this.clickedButton = this.clickedAxis;
+                    this.clickedAxis = "";
                 }
-                this.state[this.clickedButton] = "up";
-                this.clickedButton = "";
+                const button = this.controls[this.controller].buttons[this.clickedButton];
+                if (button.type === "axis") {
+                    this.state[this.clickedButton] = [
+                        Math.max(-1, Math.min(1, dx*5)),
+                        Math.max(-1, Math.min(1, dy*5)),
+                    ];
+                }
             }
         },
-        mousemove() {
-        },
         gamepadconnected(event) {
-            console.log(event.gamepad);
-            this.gamepad = event.gamepad;
-            this.gamepadActive = true;
+            if (event != null) {
+                this.gamepad = event.gamepad.index;
+                this.gamepadActive = true;
+                setInterval(this.gamepadupdate, 30);
+            } else {
+                const gamepads = navigator.getGamepads();
+                if (gamepads[0] != null) {
+                    this.gamepad = 0;
+                    this.gamepadActive = true;
+                    setInterval(this.gamepadupdate, 30);
+                }
+            }
         },
         gamepaddisconnected() {
-            this.gamepad = null;
+            this.gamepad = undefined;
             this.gamepadActive = false;
         },
         gamepadupdate() {
-
+            if (!this.gamepadActive) {
+                return;
+            }
+            const currentGamepad = navigator.getGamepads()[this.gamepad];
+            if (currentGamepad == undefined) {
+                return;
+            }
+            const buttons = this.controls[this.controller].buttons;
+            for (const [name, button] of Object.entries(buttons)) {
+                if (button.type === "button") {
+                    this.$set(this.state, name, currentGamepad.buttons[button.gamepadIdx].value);
+                } else if (button.type === "axis") {
+                    this.$set(this.state, name, [
+                        currentGamepad.axes[button.gamepadIdx[0]] * button.flip[0],
+                        currentGamepad.axes[button.gamepadIdx[1]] * button.flip[1],
+                    ]);
+                }
+            }
         }
     }
 };
