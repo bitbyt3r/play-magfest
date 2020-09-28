@@ -1,7 +1,8 @@
 <template>
 	<div id="main-container" class="container">
 		<div id="join" v-if="!session">
-			<div id="join-dialog" class="jumbotron vertical-center">
+			<img src="background.png" ref="background" class="background">
+			<div ref="content" id="join-dialog" class="jumbotron vertical-center">
 				<h1>MAGFest Plays</h1>
 				<p>Now every game is multiplayer! Everyone watching the below game streams has partial control of the console. Use keyboard or gamepad controls to play. The inputs are averaged across everyone playing, so every button press is a vote in realtime.</p>
 				<b-card-group columns>
@@ -13,7 +14,7 @@
 						</b-card-text>
 					</b-card>
 				</b-card-group>
-			</div>
+			</div>x
 		</div>
 
 		<div id="session" v-if="session">
@@ -37,6 +38,17 @@
 <style scoped>
 .controls {
 	max-width: 350px;
+}
+.background {
+	width: 100vw;
+	height: 1600px;
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	z-index: -1;
+	overflow: hidden;
 }
 </style>
 
@@ -74,8 +86,20 @@ export default {
 		.then(sessions => {
 			this.sessions = sessions;
 		});
+		window.addEventListener('scroll', this.updateScroll);
+	},
+	beforeDestroy() {
+		window.removeEventListener('scroll', this.updateScroll);
 	},
 	methods: {
+		updateScroll () {
+			const innerHeight = this.$refs.content.offsetHeight;
+			const backgroundHeight = this.$refs.background.offsetHeight;
+			const windowHeight = window.innerHeight;
+			const scrollpercent = window.scrollY / (innerHeight - windowHeight);
+			console.log(innerHeight, backgroundHeight, windowHeight, scrollpercent);
+			this.$refs.background.style.top = -1 * scrollpercent * (backgroundHeight - innerHeight) + "px";
+		},
 		joinSession (sessionInfo) {
 			this.OV = new OpenVidu();
 			this.session = this.OV.initSession();
