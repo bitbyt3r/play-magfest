@@ -17,6 +17,7 @@ var interval = null;
 var wamp = null;
 var clients = {};
 var previous_frame = {};
+var previous_axes = {};
 
 function clientUpdate(args, kwargs, details) {
     const sessionID = details.topic.split(".")[0];
@@ -35,7 +36,7 @@ function broadcastUpdates() {
     for (const [sessionID, sessionClients] of Object.entries(clients)) {
         current_frame = {buttons: {}, axes: {}};
         for (const [clientID, client] of Object.entries(sessionClients)) {
-            if (now - client.timestamp > 10) {
+            if (now - client.timestamp > 10000) {
                 delete sessionClients[clientID];
                 continue;
             }

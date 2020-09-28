@@ -50,16 +50,14 @@ axis_names = {
 
 connection.onopen = function(session, details) {
     function updateJoystick(args) {
-        console.log("Got joystick event", args);
         inputs = args[0];
         for (const [name, value] of Object.entries(inputs.buttons)) {
-            console.log(name, button_names[name]);
             device.buttons[button_names[name]+1].set(value);
         }
         for (const [name, value] of Object.entries(inputs.axes)) {
             names = axis_names[name];
-            device.axes[names[0]].set(value[0]*16384+16385);
-            device.axes[names[1]].set(value[1]*16384+16385);
+            device.axes[names[0]].set(Math.max(1, Math.min(32768, value[0]*16384+16384)));
+            device.axes[names[1]].set(Math.max(1, Math.min(32768, value[1]*16384+16384)));
         }
     }
 
