@@ -249,6 +249,9 @@ export default {
             const width = box.right - box.left;
             const height = box.bottom - box.top;
             for (const [name, status] of Object.entries(receivedState[0])) {
+                if (!Object.prototype.hasOwnProperty.call(buttons, name)) {
+                    continue;
+                }
                 if (!Object.prototype.hasOwnProperty.call(this.globaldots, name)) {
                     this.$set(this.globaldots, name, {x: 0, y: 0, visibility: 'hidden'});
                 }
