@@ -72,6 +72,16 @@
     border-radius: 50%;
     display: block;
     position: fixed;
+    z-index: 2;
+}
+.globaldot {
+    height: 15px;
+    width: 15px;
+    background-color: #00f;
+    border-radius: 50%;
+    display: block;
+    position: fixed;
+    z-index: 3;
 }
 </style>
 
@@ -229,6 +239,38 @@ export default {
         blur() {
             this.keyboardActive = false;
         },
+        receiveState(receivedState) {
+            const buttons = this.controls[this.controller].buttons;
+            const box = this.$refs.graphic.getBoundingClientRect();
+            const width = box.right - box.left;
+            const height = box.bottom - box.top;
+            for (const [name, status] of Object.entries(receivedState)) {
+                if (!Object.prototype.hasOwnProperty.call(this.globaldots, name)) {
+                    this.$set(this.globaldots, name, {x: 0, y: 0, visibility: 'hidden'});
+                }
+                if (buttons[name].type === "button") {
+                    const x = box.left + width * buttons[name].x - 15/2;
+                    const y = box.top + height * buttons[name].y - 15/2;
+                    this.$set(this.globaldots[name], 'x', x);
+                    this.$set(this.globaldots[name], 'y', y);
+                    if (status >= 0.99) {
+                        this.$set(this.globaldots[name], 'visibility', 'visible');
+                    } else {
+                        this.$set(this.globaldots[name], 'visibility', 'hidden');
+                    }
+                } else if (buttons[name].type === "axis") {
+                    const x = box.left + width * buttons[name].x - 15/2;
+                    const y = box.top + height * buttons[name].y - 15/2;
+                    this.$set(this.globaldots[name], 'x', status[0]*25+x);
+                    this.$set(this.globaldots[name], 'y', status[1]*25+y);
+                    if (Math.abs(status[0]) > 0.05 || Math.abs(status[1]) > 0.05) {
+                        this.$set(this.globaldots[name], 'visibility', 'visible');
+                    } else {
+                        this.$set(this.globaldots[name], 'visibility', 'hidden');
+                    }
+                }
+            }
+        },
         updateState() {
             const buttons = this.controls[this.controller].buttons;
             const box = this.$refs.graphic.getBoundingClientRect();
@@ -352,7 +394,11 @@ export default {
             this.clickedButton = pressed;
             const pressedaxis = this.nearestButton(event, "axis", 0.2);
             if (pressedaxis != "") {
-                this.clickedAxis = pressedaxis;
+                if (this.clickedButton === "") {
+                    this.clickedButton = pressedaxis;
+                } else {
+                    this.clickedAxis = pressedaxis;
+                }
             }
             this.clickStart = [
                 event.pageX,
