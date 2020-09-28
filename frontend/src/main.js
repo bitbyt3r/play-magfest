@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import VueWamp from 'vue-wamp'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -11,6 +12,10 @@ import GamePad from './components/Gamepad.vue'
 
 Vue.config.productionTip = false
 Vue.use(VueRouter);
+Vue.use(VueWamp, {
+    url: "wss://crossbar.hackafe.net:7778/ws",
+    realm: "realm1",
+});
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 

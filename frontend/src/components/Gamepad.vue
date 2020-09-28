@@ -2,8 +2,8 @@
 	<div>
         <img ref="graphic" :src="controls[controller].image" width="300px" @mousedown="mousedown" draggable="false">
         <div>
-            <span v-for="(dot, name) in userdots" v-bind:key="name" class="userdot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
-            <span v-for="(dot, name) in globaldots" v-bind:key="name" class="globaldot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
+            <span v-for="(dot, name) in userdots" v-bind:key="'u'+name" class="userdot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
+            <span v-for="(dot, name) in globaldots" v-bind:key="'g'+name" class="globaldot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
         </div>
         <div v-if="gamepadActive">
             Gamepad connected, keyboard disabled.
@@ -103,6 +103,7 @@ export default {
             gamepadActive: false,
             keyboardActive: true,
             statusUpdater: undefined,
+            controllerSubscription: undefined,
             image: "gameboy.jpg",
             userdots: {},
             globaldots: {},
@@ -218,6 +219,7 @@ export default {
             window.addEventListener('focus', this.focus);
             window.addEventListener('blur', this.blur);
             this.statusUpdater = setInterval(this.updateState, 30);
+            this.controllerSubscription = this.$wamp.subscribe(this.sessionID+'.controller', this.receiveState);
         },
         clearListeners() {
             window.removeEventListener('keydown', this.keydown);
@@ -232,6 +234,7 @@ export default {
                 window.removeEventListener('mousemove', this.mousemove);
             }
             clearInterval(this.statusUpdater);
+            this.$wamp.unsubscribe(this.controllerSubscription);
         },
         focus() {
             this.keyboardActive = true;
@@ -244,7 +247,7 @@ export default {
             const box = this.$refs.graphic.getBoundingClientRect();
             const width = box.right - box.left;
             const height = box.bottom - box.top;
-            for (const [name, status] of Object.entries(receivedState)) {
+            for (const [name, status] of Object.entries(receivedState[0])) {
                 if (!Object.prototype.hasOwnProperty.call(this.globaldots, name)) {
                     this.$set(this.globaldots, name, {x: 0, y: 0, visibility: 'hidden'});
                 }
@@ -302,6 +305,7 @@ export default {
                     }
                 }
             }
+            this.$wamp.publish(this.sessionID+'.inputs', [this.state]);
         },
         keydown(event) {
             if (this.gamepadActive) {
