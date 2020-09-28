@@ -220,9 +220,12 @@ export default {
             window.addEventListener('focus', this.focus);
             window.addEventListener('blur', this.blur);
             this.statusUpdater = setInterval(this.updateState, 30);
-            this.controllerSubscription = this.$wamp.subscribe(this.sessionID+'.feedback', this.receiveState);
+            this.$wamp.subscribe(this.sessionID+'.feedback', this.receiveState).then(sub => {
+                this.controllerSubscription = sub;
+            });
         },
         clearListeners() {
+            this.gamepaddisconnected();
             window.removeEventListener('keydown', this.keydown);
             window.removeEventListener('keyup', this.keyup);
             window.removeEventListener('mouseup', this.mouseup);
