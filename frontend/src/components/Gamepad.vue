@@ -219,7 +219,7 @@ export default {
             window.addEventListener('focus', this.focus);
             window.addEventListener('blur', this.blur);
             this.statusUpdater = setInterval(this.updateState, 30);
-            this.controllerSubscription = this.$wamp.subscribe(this.sessionID+'.controller', this.receiveState);
+            this.controllerSubscription = this.$wamp.subscribe(this.sessionID+'.feedback', this.receiveState);
         },
         clearListeners() {
             window.removeEventListener('keydown', this.keydown);
