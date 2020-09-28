@@ -72,19 +72,21 @@ function broadcastUpdates() {
             }
         }
 
-        var state = {buttons: {}, axes: {}};
+        var state = {buttons: {}, axes: {analog0: [0,0], analog1: [0,0]}};
         for (const [button, changes] of Object.entries(current_frame.buttons)) {
-            state.buttons[button] = changes.down > changes.up ? 1:0;
+            state.buttons[button] = (changes.down > changes.up) ? false : true;
         }
         for (const [axis, states] of Object.entries(current_frame.axes)) {
             var x = 0;
             var y = 0;
-            states.forEach(n => {
-                x += n[0];
-                y += n[0];
-            });
-            x = x / states.length;
-            y = y / states.length;
+            if (states.length > 0) {
+                states.forEach(n => {
+                    x += n[0];
+                    y += n[1];
+                });
+                x = x / states.length;
+                y = y / states.length;
+            }
             state.axes[axis] = [x, y];
         }
         wamp.publish(sessionID+'.controller', [state]);

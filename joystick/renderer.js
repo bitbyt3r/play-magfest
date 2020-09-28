@@ -45,7 +45,7 @@ button_names = {
 
 axis_names = {
     analog0: ['X', 'Y'],
-    analog1: ['RX', 'RY'],
+    analog1: ['Rx', 'Ry'],
 }
 
 connection.onopen = function(session, details) {
@@ -53,12 +53,13 @@ connection.onopen = function(session, details) {
         console.log("Got joystick event", args);
         inputs = args[0];
         for (const [name, value] of Object.entries(inputs.buttons)) {
-            device.buttons[button_names[name]].set(value);
+            console.log(name, button_names[name]);
+            device.buttons[button_names[name]+1].set(value);
         }
         for (const [name, value] of Object.entries(inputs.axes)) {
             names = axis_names[name];
-            device.axes[names[0]].set(value[0]);
-            device.axes[names[1]].set(value[1]);
+            device.axes[names[0]].set(value[0]*16384+16385);
+            device.axes[names[1]].set(value[1]*16384+16385);
         }
     }
 
