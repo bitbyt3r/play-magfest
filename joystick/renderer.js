@@ -24,15 +24,41 @@ var connection = new autobahn.Connection({
 var subscription = null;
 var sessionID = "katamari";
 
+button_names = {
+    a:         0, 
+    b:         1, 
+    x:         2, 
+    y:         3, 
+    lshoulder: 4, 
+    rshoulder: 5, 
+    ltrigger:  6,
+    rtrigger:  7,
+    select:    8, 
+    start:     9, 
+    lstick:    10,
+    rstick:    11,
+    up:        12,
+    down:      13,
+    left:      14,
+    right:     15,
+};
+
+axis_names = {
+    analog0: ['X', 'Y'],
+    analog1: ['RX', 'RY'],
+}
+
 connection.onopen = function(session, details) {
     function updateJoystick(args) {
         console.log("Got joystick event", args);
         inputs = args[0];
         for (const [name, value] of Object.entries(inputs.buttons)) {
-            device.buttons[name].set(value);
+            device.buttons[button_names[name]].set(value);
         }
         for (const [name, value] of Object.entries(inputs.axes)) {
-            device.axes[name].set(value);
+            names = axis_names[name];
+            device.axes[names[0]].set(value[0]);
+            device.axes[names[1]].set(value[1]);
         }
     }
 
