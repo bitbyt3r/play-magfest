@@ -5,6 +5,12 @@
             <span v-for="(dot, name) in userdots" v-bind:key="'u'+name" class="userdot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
             <span v-for="(dot, name) in globaldots" v-bind:key="'g'+name" class="globaldot" :style="'top: '+ dot.y + 'px;left: '+dot.x+'px; visibility: '+dot.visibility"></span>
         </div>
+        <div>
+            <b>
+                <p v-if="players == 1">You are the only player.</p>
+                <p v-else>You are one of {{ players }} players.</p>
+            </b>
+        </div>
         <div v-if="gamepadActive">
             Gamepad connected, keyboard disabled.
             <b-button @click="gamepaddisconnected">Disable Gamepad</b-button>
@@ -58,6 +64,7 @@
                     Right Shoulder - E<br>
                     Start - B
                 </div>
+                <p>You can also plug in a gamepad or click the controls with your mouse!</p>
             </div>
             <div v-else>Keyboard controls disabled. Click here to activate.</div>
         </div>
@@ -99,11 +106,14 @@ export default {
 
     data() {
         return {
+            players: 1,
             gamepad: undefined,
             gamepadActive: false,
             keyboardActive: true,
             statusUpdater: undefined,
             controllerSubscription: undefined,
+            playersubSubscription: undefined,
+            playerunsubSubscription: undefined,
             image: "gameboy.jpg",
             userdots: {},
             globaldots: {},
@@ -192,19 +202,15 @@ export default {
         }
     },
     mounted () {
-        console.log("mounted");
         this.setListeners();
     },
     beforeDestroy() {
-        console.log("beforeDestroy");
         this.clearListeners();
     },
     activated () {
-        console.log("activated");
         this.setListeners();
     },
     deactivated() {
-        console.log("deactivated");
         this.clearListeners();
     },
 
@@ -223,6 +229,12 @@ export default {
             this.$wamp.subscribe(this.sessionID+'.feedback', this.receiveState).then(sub => {
                 this.controllerSubscription = sub;
             });
+            this.$wamp.subscribe('wamp.subscription.on_subscribe', this.updatePlayers).then(sub => {
+                this.playersubSubscription = sub;
+            });
+            this.$wamp.subscribe('wamp.subscription.on_unsubscribe', this.updatePlayers).then(sub => {
+                this.playerunsubSubscription = sub;
+            });
         },
         clearListeners() {
             this.gamepaddisconnected();
@@ -239,6 +251,13 @@ export default {
             }
             clearInterval(this.statusUpdater);
             this.$wamp.unsubscribe(this.controllerSubscription);
+            this.$wamp.unsubscribe(this.playersubSubscription);
+            this.$wamp.unsubscribe(this.playerunsubSubscription);
+        },
+        updatePlayers() {
+            this.$wamp.call('wamp.subscription.list_subscribers', [this.controllerSubscription.id]).then(args => {
+                this.players = args.length;
+            });
         },
         focus() {
             this.keyboardActive = true;
@@ -463,10 +482,13 @@ export default {
                 setInterval(this.gamepadupdate, 30);
             } else {
                 const gamepads = navigator.getGamepads();
-                if (gamepads[0] != null) {
-                    this.gamepad = 0;
-                    this.gamepadActive = true;
-                    setInterval(this.gamepadupdate, 30);
+                for (var i=gamepads.length-1; i>=0; i--) {
+                    if (gamepads[i] != null) {
+                        this.gamepad = i;
+                        this.gamepadActive = true;
+                        setInterval(this.gamepadupdate, 30);
+                        return;
+                    }
                 }
             }
         },
