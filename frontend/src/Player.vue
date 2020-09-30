@@ -1,7 +1,7 @@
 <template>
 	<div id="main-container" class="container">
 		<div id="join" v-if="!session">
-			<img src="background.png" ref="background" class="background">
+			<img src="background.jpg" ref="background" class="background">
 			<div ref="content" id="join-dialog" class="jumbotron vertical-center">
 				<h1>MAGFest Plays</h1>
 				<p>Now every game is multiplayer! Everyone watching the below game streams has partial control of the console. Use keyboard or gamepad controls to play. The inputs are averaged across everyone playing, so every button press is a vote in realtime.</p>
@@ -97,7 +97,6 @@ export default {
 			const backgroundHeight = this.$refs.background.offsetHeight;
 			const windowHeight = window.innerHeight;
 			const scrollpercent = window.scrollY / (innerHeight - windowHeight);
-			console.log(innerHeight, backgroundHeight, windowHeight, scrollpercent);
 			this.$refs.background.style.top = -1 * scrollpercent * (backgroundHeight - innerHeight) + "px";
 		},
 		joinSession (sessionInfo) {
@@ -107,7 +106,6 @@ export default {
 
 			this.session.on('streamCreated', ({ stream }) => {
 				const subscriber = this.session.subscribe(stream);
-				console.log(subscriber, stream);
 				this.subscribers.push(subscriber);
 			});
 
