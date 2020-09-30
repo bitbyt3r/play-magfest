@@ -9,6 +9,7 @@ import Player from './Player.vue'
 import Stream from './Stream.vue'
 import App from './App.vue'
 import GamePad from './components/Gamepad.vue'
+import Menu from './Menu.vue'
 
 Vue.config.productionTip = false
 Vue.use(VueRouter);
@@ -20,7 +21,8 @@ Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 
 const routes = [
-  {path: "/", component: Player},
+  {path: "/", component: Menu},
+  {path: "/play/:sessionID", component: Player, props: true},
   {path: "/stream", component: Stream},
   {path: "/gamepad", component: GamePad},
 ]

@@ -1,37 +1,18 @@
 <template>
 	<div id="main-container" class="container">
-		<div id="join" v-if="!session">
-			<img src="background.jpg" ref="background" class="background">
-			<div ref="content" id="join-dialog" class="jumbotron vertical-center">
-				<h1>MAGFest Plays</h1>
-				<p>Now every game is multiplayer! Everyone watching the below game streams has partial control of the console. Use keyboard or gamepad controls to play. The inputs are averaged across everyone playing, so every button press is a vote in realtime.</p>
-				<b-card-group columns>
-					<b-card v-for="info in sessions" :key="info.sessionId" :title="info.title" :img-src="info.thumbnail" img-top>
-						<b-card-text>
-							<p><b>Console:</b> {{ info.console }}</p>
-							<p><b>Description:</b> {{ info.description }}</p>
-							<b-button @click="joinSession(info)">Launch</b-button>
-						</b-card-text>
-					</b-card>
-				</b-card-group>
-			</div>x
-		</div>
-
-		<div id="session" v-if="session">
-			<b-card-group deck>
-				<b-card :title="activeSession.title">
-					<b-card-text>
-						<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub"/>
-					</b-card-text>
-				</b-card>
-				<b-card class="controls" title="Controls">
-					<b-card-text>
-						<game-pad :controller="activeSession.controller" :sessionID="activeSession.sessionID" :key="activeSession.controller"></game-pad>
-						<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="leaveSession" value="Back To Menu">
-					</b-card-text>
-				</b-card>
-			</b-card-group>
-		</div>
+		<b-card-group deck>
+			<b-card :title="activeSession.title">
+				<b-card-text>
+					<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub"/>
+				</b-card-text>
+			</b-card>
+			<b-card class="controls" title="Controls">
+				<b-card-text>
+					<game-pad v-if="activeSession.sessionID" :controller="activeSession.controller" :sessionID="activeSession.sessionID" :key="activeSession.controller" ref="controller"></game-pad>
+					<input class="btn btn-large btn-danger" type="button" id="buttonLeaveSession" @click="$router.push('/')" value="Back To Menu">
+				</b-card-text>
+			</b-card>
+		</b-card-group>
 	</div>
 </template>
 
@@ -70,6 +51,13 @@ export default {
 		GamePad,
 	},
 
+	props: {
+		sessionID: {
+			type: String,
+			default: "",
+		}
+	},
+
 	data () {
 		return {
 			OV: undefined,
@@ -85,20 +73,14 @@ export default {
 		.then(response => response.data)
 		.then(sessions => {
 			this.sessions = sessions;
+			this.sessions.forEach(sess => {
+				if (sess.sessionID === this.sessionID) {
+					this.joinSession(sess);
+				}
+			});
 		});
-		window.addEventListener('scroll', this.updateScroll);
-	},
-	beforeDestroy() {
-		window.removeEventListener('scroll', this.updateScroll);
 	},
 	methods: {
-		updateScroll () {
-			const innerHeight = this.$refs.content.offsetHeight;
-			const backgroundHeight = this.$refs.background.offsetHeight;
-			const windowHeight = window.innerHeight;
-			const scrollpercent = window.scrollY / (innerHeight - windowHeight);
-			this.$refs.background.style.top = -1 * scrollpercent * (backgroundHeight - innerHeight) + "px";
-		},
 		joinSession (sessionInfo) {
 			this.OV = new OpenVidu();
 			this.session = this.OV.initSession();
@@ -123,17 +105,7 @@ export default {
 					});
 			});
 
-			window.addEventListener('beforeunload', this.leaveSession)
-		},
-
-		leaveSession () {
-			if (this.session) this.session.disconnect();
-
-			this.session = undefined;
-			this.subscribers = [];
-			this.OV = undefined;
-
-			window.removeEventListener('beforeunload', this.leaveSession);
+			window.addEventListener('beforeunload', this.leaveSession);
 		},
 
 		getToken (sessionId) {
