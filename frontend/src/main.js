@@ -4,6 +4,7 @@ import VueWamp from 'vue-wamp'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import VueAnalytics from 'vue-analytics'
 
 import Player from './Player.vue'
 import Stream from './Stream.vue'
@@ -30,6 +31,11 @@ const routes = [
 const router = new VueRouter({
   mode: 'history',
   routes
+});
+
+Vue.use(VueAnalytics, {
+  id: 'UA-164741362-2',
+  router
 });
 
 new Vue({
