@@ -1,11 +1,11 @@
 <template>
 	<div id="main-container" class="container">
-        <img src="background.jpg" ref="background" class="background">
+        <img src="/background.jpg" ref="background" class="background">
         <div ref="content" id="join-dialog" class="jumbotron vertical-center">
             <h1>MAGFest Plays</h1>
             <p>Now every game is multiplayer! Everyone watching the below game streams has partial control of the console. Use keyboard or gamepad controls to play. The inputs are averaged across everyone playing, so every button press is a vote in realtime.</p>
             <b-card-group columns>
-                <b-card v-for="info in sessions" :key="info.sessionId" :title="info.title" :img-src="info.thumbnail" img-top>
+                <b-card v-for="info in sessions" :key="info.sessionId" :title="info.title" :img-src="'/'+info.thumbnail" img-top>
                     <b-card-text>
                         <p><b>Console:</b> {{ info.console }}</p>
                         <p><b>Description:</b> {{ info.description }}</p>

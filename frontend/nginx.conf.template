@@ -24,6 +24,7 @@ http {
         listen ${SERVER_PORT};
         root /usr/share/nginx/html;
         location / {
+			try_files $uri $uri/ /index.html;
         }
 		location /authenticate {
 			proxy_pass http://gunicorn;

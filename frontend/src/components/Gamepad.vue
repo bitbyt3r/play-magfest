@@ -133,7 +133,7 @@ export default {
                         left:   {x: 0.13,   y: 0.6768, type: "button", gamepadIdx: 14, keycode: "ArrowLeft"},
                         right:  {x: 0.2833, y: 0.6788, type: "button", gamepadIdx: 15, keycode: "ArrowRight"},
                     },
-                    image: "gameboy.jpg",
+                    image: "/gameboy.jpg",
                 },
                 n64: {
                     buttons: {
@@ -153,7 +153,7 @@ export default {
                         right:     {x: 0.2567, y: 0.3254, type: "button", gamepadIdx: 15, keycode: "KeyD"},
                         analog0:   {x: 0.5100, y: 0.5424, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyH", "KeyB", "KeyN", "KeyM"]},
                     },
-                    image: "n64.jpg",
+                    image: "/n64.jpg",
                 },
                 playstation: {
                     buttons: {
@@ -177,7 +177,7 @@ export default {
                         analog1:   {x: 0.6367, y: 0.6200, type: "axis", gamepadIdx: [2, 3], flip: [1, 1], keycode: ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"]},
                         
                     },
-                    image: "playstation.jpg",
+                    image: "/playstation.jpg",
                 },
                 gamecube: {
                     buttons: {
@@ -196,7 +196,7 @@ export default {
                         analog0:   {x: 0.2533, y: 0.3621, type: "axis", gamepadIdx: [0, 1], flip: [1, 1], keycode: ["KeyW", "KeyA", "KeyS", "KeyD"]},
                         analog1:    {x: 0.6167, y: 0.5733, type: "axis", gamepadIdx: [2, 3], flip: [1, 1], keycode: ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"]},
                     },
-                    image: "gamecube.jpg",
+                    image: "/gamecube.jpg",
                 }
             }
         }
