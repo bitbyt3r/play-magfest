@@ -114,8 +114,8 @@ export default {
             controls: {
                 gameboy: {
                     buttons: {
-                        a:      {x: 0.6933, y: 0.6890, type: "button", gamepadIdx: 0, keycode: "KeyZ"},
-                        b:      {x: 0.8566, y: 0.6443, type: "button", gamepadIdx: 1, keycode: "KeyX"},
+                        a:      {x: 0.8566, y: 0.6443, type: "button", gamepadIdx: 0, keycode: "KeyZ"},
+                        b:      {x: 0.6933, y: 0.6890, type: "button", gamepadIdx: 1, keycode: "KeyX"},
                         select: {x: 0.36,   y: 0.8211, type: "button", gamepadIdx: 8, keycode: "KeyS"},
                         start:  {x: 0.53,   y: 0.8191, type: "button", gamepadIdx: 9, keycode: "KeyA"},
                         up:     {x: 0.2067, y: 0.6321, type: "button", gamepadIdx: 12, keycode: "ArrowUp"},
