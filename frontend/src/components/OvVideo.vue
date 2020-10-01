@@ -1,5 +1,5 @@
 <template>
-	<video class="videoplayer" autoplay/>
+	<video class="videoplayer" autoplay controls="true"/>
 </template>
 
 <style>
