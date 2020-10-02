@@ -4,6 +4,8 @@
 			<b-card :title="activeSession.title">
 				<b-card-text>
 					<user-video v-for="(sub, index) in subscribers" :key="index" :stream-manager="sub"/>
+					<a href="https://discord.gg/magfest">Chat with the other players on MAGFest's Discord Server</a><br>
+					(Use the MAGWest 2020 > MAGPlays audio chat!)
 				</b-card-text>
 			</b-card>
 			<b-card class="controls" title="Controls">
