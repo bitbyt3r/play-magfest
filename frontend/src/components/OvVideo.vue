@@ -19,6 +19,7 @@ export default {
 
 	mounted () {
 		this.streamManager.addVideoElement(this.$el);
+		this.$el.volume = 0.5;
 	},
 };
 </script>
